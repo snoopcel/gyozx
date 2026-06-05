@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Bio Link</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700;900&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#00BCD4;--card:#FFE000;--black:#111;--s3:3px 3px 0 var(--black);--s6:8px 8px 0 var(--black)}
+html{font-size:16px}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:clamp(16px,5vw,48px) 16px}
+.card{background:var(--card);border:3px solid var(--black);border-radius:clamp(16px,4vw,24px);padding:clamp(24px,5vw,40px) clamp(20px,5vw,32px) clamp(24px,5vw,36px);width:100%;max-width:420px;display:flex;flex-direction:column;align-items:center;box-shadow:var(--s6);animation:popIn .5s cubic-bezier(.34,1.56,.64,1) both}
+@keyframes popIn{from{opacity:0;transform:scale(.88) translateY(20px)}to{opacity:1;transform:none}}
+.avatar-wrap{width:clamp(72px,18vw,96px);height:clamp(72px,18vw,96px);border-radius:50%;border:3px solid var(--black);overflow:hidden;background:#ccc;box-shadow:var(--s3);margin-bottom:clamp(10px,3vw,16px)}
+.avatar-wrap img{width:100%;height:100%;object-fit:cover;display:block}
+.profile-name{font-weight:900;font-size:clamp(.95rem,3.5vw,1.15rem);color:var(--black);letter-spacing:-.3px;text-align:center}
+.profile-bio{font-size:clamp(.78rem,3vw,.9rem);color:#333;margin-top:4px;margin-bottom:clamp(14px,4vw,20px);text-align:center;line-height:1.4;max-width:280px}
+.socials{display:flex;gap:clamp(8px,2.5vw,14px);margin-bottom:clamp(18px,5vw,28px);flex-wrap:wrap;justify-content:center}
+.socials a{color:var(--black);display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:8px;transition:transform .15s,background .15s;text-decoration:none}
+.socials a:hover{background:rgba(0,0,0,.1);transform:scale(1.2)}
+.socials a svg{width:clamp(18px,5vw,22px);height:clamp(18px,5vw,22px)}
+.links{display:flex;flex-direction:column;gap:clamp(10px,3vw,14px);width:100%}
+.link-btn{display:flex;align-items:center;justify-content:center;width:100%;padding:clamp(13px,3.5vw,17px) clamp(14px,4vw,20px);border:2.5px solid var(--black);border-radius:clamp(8px,3vw,12px);font-family:'DM Sans',sans-serif;font-weight:900;font-size:clamp(.85rem,3.5vw,1rem);text-decoration:none;color:var(--black);transition:transform .12s,box-shadow .12s;box-shadow:var(--s3);-webkit-tap-highlight-color:transparent}
+.link-btn:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 var(--black)}
+.link-btn:active{transform:translate(3px,3px);box-shadow:1px 1px 0 var(--black)}
+.footer-badge{margin-top:clamp(20px,5vw,30px);background:#FFD700;border:2.5px solid var(--black);border-radius:8px;padding:5px 12px;font-weight:900;font-size:.72rem;letter-spacing:1.5px;box-shadow:var(--s3)}
+@keyframes flash{0%,100%{opacity:1}50%{opacity:.4}}
+.flash{animation:flash .35s ease}
+.loading{opacity:.5;font-size:.85rem;text-align:center;margin-top:12px}
+@media(hover:none){.link-btn{padding:clamp(15px,4vw,18px) clamp(14px,4vw,20px)}}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="avatar-wrap"><img id="bioAvatar" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Crect width='96' height='96' fill='%23ddd'/%3E%3Ccircle cx='48' cy='36' r='18' fill='%23aaa'/%3E%3Cellipse cx='48' cy='80' rx='28' ry='20' fill='%23aaa'/%3E%3C/svg%3E" alt="Avatar"/></div>
+  <div class="profile-name" id="bioName">Your Name</div>
+  <div class="profile-bio" id="bioBio"></div>
+  <div class="socials">
+    <a href="#" title="Twitter/X"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.733-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+    <a href="#" title="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg></a>
+    <a href="#" title="TikTok"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.32 6.32 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V9.07a8.16 8.16 0 004.77 1.52V7.14a4.85 4.85 0 01-1-.45z"/></svg></a>
+    <a href="#" title="YouTube"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M23 7s-.3-1.9-1.1-2.7c-1.1-1.1-2.3-1.1-2.8-1.2C16.2 3 12 3 12 3s-4.2 0-7.1.1c-.5.1-1.7.1-2.8 1.2C1.3 5.1 1 7 1 7S.7 9.2.7 11.3v2c0 2.1.3 4.3.3 4.3s.3 1.9 1.1 2.7c1.1 1.1 2.5 1 3.1 1.1C7.2 21.6 12 21.7 12 21.7s4.2 0 7.1-.2c.5-.1 1.7-.1 2.8-1.2.8-.8 1.1-2.7 1.1-2.7s.3-2.2.3-4.3v-2C23.3 9.2 23 7 23 7zM9.7 15.5V8.4l7.6 3.6-7.6 3.5z"/></svg></a>
+    <a href="#" title="Spotify"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm4.586 14.424a.622.622 0 01-.857.207c-2.348-1.435-5.304-1.76-8.785-.964a.623.623 0 01-.277-1.215c3.809-.87 7.076-.496 9.712 1.115.294.181.387.564.207.857zm1.223-2.722a.78.78 0 01-1.072.257c-2.687-1.652-6.785-2.131-9.965-1.166a.78.78 0 01-.973-.519.782.782 0 01.52-.974c3.632-1.102 8.147-.568 11.234 1.329a.78.78 0 01.256 1.073zm.105-2.835c-3.223-1.914-8.54-2.09-11.618-1.156a.935.935 0 11-.543-1.79c3.532-1.073 9.404-.865 13.115 1.338a.936.936 0 01-1.032 1.568z"/></svg></a>
+  </div>
+  <div class="links" id="bioLinks"><div class="loading">Memuat...</div></div>
+  <div class="footer-badge">BIO.LINK</div>
+</div>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyDt4yo-bMA-n9klqeDHEUS-S8AJroXlKXo",
+  authDomain: "gyozx-25780.firebaseapp.com",
+  projectId: "gyozx-25780",
+  storageBucket: "gyozx-25780.firebasestorage.app",
+  messagingSenderId: "50259732126",
+  appId: "1:50259732126:web:9888c31afbea9622dffd8f"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+const PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Crect width='96' height='96' fill='%23ddd'/%3E%3Ccircle cx='48' cy='36' r='18' fill='%23aaa'/%3E%3Cellipse cx='48' cy='80' rx='28' ry='20' fill='%23aaa'/%3E%3C/svg%3E";
+
+function esc(s){ return String(s).replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function render(data, animate) {
+  const av = document.getElementById('bioAvatar');
+  const nm = document.getElementById('bioName');
+  const bi = document.getElementById('bioBio');
+  const lk = document.getElementById('bioLinks');
+  if (animate) {
+    [av, nm, bi, lk].forEach(el => { el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); });
+  }
+  av.src = data.avatar || PLACEHOLDER;
+  nm.textContent = data.name || 'Your Name';
+  bi.textContent = data.bio  || '';
+  lk.innerHTML = (data.links || []).map(l =>
+    `<a href="${encodeURI(l.url)}" class="link-btn" target="_blank" rel="noopener" style="background:${l.color}">${esc(l.title)}</a>`
+  ).join('') || '<div style="font-size:.85rem;color:#555;text-align:center">Belum ada link</div>';
+}
+
+// Realtime listener — update otomatis saat admin simpan
+db.collection('biolink').doc('profile').onSnapshot(doc => {
+  if (doc.exists) {
+    render(doc.data(), true);
+  }
+}, err => console.error('Firestore error:', err));
+</script>
+</body>
+</html>

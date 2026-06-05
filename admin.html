@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Admin — Bio Link</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700;900&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--yellow:#FFE000;--cyan:#00BCD4;--mint:#4DD9C4;--green:#39FF6E;--black:#111;--white:#FAFAFA;--s3:3px 3px 0 var(--black);--s4:4px 4px 0 var(--black);--s6:6px 6px 0 var(--black)}
+html{font-size:16px;-webkit-text-size-adjust:100%}
+body{font-family:'DM Sans',sans-serif;background:var(--cyan);min-height:100vh;color:var(--black);overflow-x:hidden}
+
+/* LOGIN */
+#loginScreen{position:fixed;inset:0;z-index:9999;background:var(--cyan);display:flex;align-items:center;justify-content:center;padding:20px}
+.login-card{background:var(--yellow);border:3px solid var(--black);border-radius:20px;padding:clamp(28px,6vw,40px) clamp(24px,6vw,40px);width:100%;max-width:380px;box-shadow:8px 8px 0 var(--black);animation:popIn .5s cubic-bezier(.34,1.56,.64,1) both}
+.login-logo{font-family:'Bebas Neue',cursive;font-size:2rem;letter-spacing:2px;display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.login-logo span{background:var(--black);color:var(--yellow);padding:2px 10px;border-radius:6px}
+.login-sub{font-size:.85rem;font-weight:500;color:#444;margin-bottom:24px}
+.login-err{font-size:.82rem;font-weight:700;color:#FF3A3A;margin-bottom:12px;display:none;padding:8px 12px;background:rgba(255,58,58,.12);border:2px solid #FF3A3A;border-radius:8px}
+.login-err.show{display:block}
+.login-hint{font-size:.75rem;color:#666;margin-top:10px;font-weight:500;text-align:center}
+
+/* TOPBAR */
+.topbar{display:none;position:sticky;top:0;z-index:200;background:var(--yellow);border-bottom:3px solid var(--black);padding:0 16px;height:56px;align-items:center;justify-content:space-between}
+.topbar-logo{font-family:'Bebas Neue',cursive;font-size:1.4rem;letter-spacing:1px;display:flex;align-items:center;gap:6px}
+.topbar-logo span{background:var(--black);color:var(--yellow);padding:1px 7px;border-radius:4px}
+.hamburger{background:none;border:2.5px solid var(--black);border-radius:8px;padding:6px;cursor:pointer;display:flex;align-items:center;-webkit-tap-highlight-color:transparent}
+.hamburger svg{width:20px;height:20px}
+
+/* LAYOUT */
+.layout{display:flex;min-height:100vh}
+.sidebar{width:220px;flex-shrink:0;background:var(--yellow);border-right:3px solid var(--black);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;transition:transform .25s ease;z-index:150}
+.sidebar-logo{padding:22px 18px 18px;border-bottom:3px solid var(--black);font-family:'Bebas Neue',cursive;font-size:1.5rem;letter-spacing:2px;display:flex;align-items:center;gap:8px}
+.sidebar-logo span{background:var(--black);color:var(--yellow);padding:2px 8px;border-radius:4px}
+.nav{display:flex;flex-direction:column;padding:14px 10px;gap:4px;flex:1}
+.nav-item{display:flex;align-items:center;gap:10px;padding:11px 13px;border-radius:10px;border:2.5px solid transparent;font-weight:700;font-size:.88rem;cursor:pointer;background:none;color:var(--black);transition:all .15s;text-align:left;width:100%;-webkit-tap-highlight-color:transparent}
+.nav-item svg{width:17px;height:17px;flex-shrink:0}
+.nav-item:hover{background:rgba(0,0,0,.07);border-color:var(--black)}
+.nav-item.active{background:var(--black);color:var(--yellow);border-color:var(--black);box-shadow:var(--s4)}
+.sidebar-footer{padding:14px 18px;border-top:3px solid var(--black);font-size:.75rem;font-weight:700;opacity:.55}
+.logout-btn{margin:0 10px 12px;padding:10px 13px;background:none;border:2.5px solid var(--black);border-radius:10px;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:700;font-size:.85rem;display:flex;align-items:center;gap:8px;color:var(--black);transition:all .15s;-webkit-tap-highlight-color:transparent}
+.logout-btn:hover{background:#FF3A3A;color:#fff;border-color:#FF3A3A}
+.logout-btn svg{width:16px;height:16px}
+.drawer-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:140;opacity:0;pointer-events:none;transition:opacity .25s}
+
+/* MAIN */
+.main{flex:1;min-width:0;padding:clamp(20px,4vw,32px) clamp(16px,4vw,28px);overflow-y:auto}
+.page-header{margin-bottom:clamp(18px,4vw,28px);animation:slideDown .35s ease both}
+.page-header h1{font-family:'Bebas Neue',cursive;font-size:clamp(2rem,6vw,2.8rem);letter-spacing:1px;line-height:1}
+.page-header p{font-size:clamp(.78rem,2.5vw,.88rem);color:#1a5a66;font-weight:500;margin-top:4px}
+.live-badge{display:inline-flex;align-items:center;gap:5px;background:var(--black);color:var(--green);font-size:.68rem;font-weight:700;letter-spacing:.5px;padding:3px 9px;border-radius:20px;margin-left:8px;vertical-align:middle}
+.live-dot{width:6px;height:6px;background:var(--green);border-radius:50%;animation:blink 1.2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+
+/* SECTION */
+.section{background:var(--yellow);border:3px solid var(--black);border-radius:clamp(12px,3vw,16px);padding:clamp(18px,4vw,26px) clamp(16px,4vw,24px) clamp(20px,4vw,28px);margin-bottom:clamp(16px,3vw,24px);box-shadow:var(--s6);animation:popUp .4s cubic-bezier(.34,1.56,.64,1) both}
+.section:nth-child(2){animation-delay:.07s}
+.section:nth-child(3){animation-delay:.14s}
+.section-title{font-family:'Bebas Neue',cursive;font-size:clamp(1.1rem,3.5vw,1.35rem);letter-spacing:1px;margin-bottom:clamp(14px,3vw,18px);display:flex;align-items:center;gap:7px;padding-bottom:10px;border-bottom:2.5px solid var(--black)}
+.section-title svg{width:18px;height:18px;flex-shrink:0}
+
+/* PHOTO */
+.photo-area{display:flex;align-items:center;gap:clamp(14px,4vw,24px);flex-wrap:wrap}
+.avatar-preview{width:clamp(72px,18vw,90px);height:clamp(72px,18vw,90px);border-radius:50%;border:3px solid var(--black);box-shadow:var(--s4);overflow:hidden;flex-shrink:0;background:#ddd;cursor:pointer;position:relative;transition:transform .15s;-webkit-tap-highlight-color:transparent}
+.avatar-preview:hover{transform:scale(1.05)}
+.avatar-preview img{width:100%;height:100%;object-fit:cover;display:block}
+.av-overlay{position:absolute;inset:0;border-radius:50%;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .15s}
+.avatar-preview:hover .av-overlay{opacity:1}
+.av-overlay svg{color:#fff;width:26px;height:26px}
+.photo-info{display:flex;flex-direction:column;gap:8px;flex:1;min-width:180px}
+.photo-info p{font-size:clamp(.78rem,2.5vw,.82rem);color:#444;font-weight:500;line-height:1.4}
+.photo-btns{display:flex;gap:8px;flex-wrap:wrap}
+#fileInput{display:none}
+
+/* FIELDS */
+.field{display:flex;flex-direction:column;gap:5px;margin-bottom:clamp(10px,2.5vw,14px)}
+.field label{font-weight:700;font-size:clamp(.78rem,2.5vw,.84rem);letter-spacing:.2px}
+.field input,.field textarea{width:100%;padding:clamp(10px,2.5vw,12px) clamp(12px,3vw,14px);border:2.5px solid var(--black);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:clamp(.85rem,3vw,.92rem);font-weight:500;background:var(--white);outline:none;transition:box-shadow .15s;resize:vertical;color:var(--black);-webkit-appearance:none}
+.field input:focus,.field textarea:focus{box-shadow:var(--s4)}
+.field textarea{min-height:76px;line-height:1.5}
+.pass-wrap{position:relative}
+.pass-wrap input{padding-right:44px}
+.pass-toggle{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#666;padding:4px;display:flex;align-items:center}
+.pass-toggle svg{width:18px;height:18px}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:clamp(10px,2.5vw,11px) clamp(14px,3vw,20px);border:2.5px solid var(--black);border-radius:10px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:clamp(.8rem,2.5vw,.88rem);cursor:pointer;transition:transform .12s,box-shadow .12s;box-shadow:var(--s4);text-decoration:none;white-space:nowrap;-webkit-tap-highlight-color:transparent}
+.btn:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 var(--black)}
+.btn:active{transform:translate(3px,3px);box-shadow:1px 1px 0 var(--black)}
+.btn svg{width:15px;height:15px;flex-shrink:0}
+.btn-black{background:var(--black);color:var(--yellow)}
+.btn-green{background:var(--green);color:var(--black)}
+.btn-mint{background:var(--mint);color:var(--black)}
+.btn-red{background:#FF3A3A;color:#fff}
+.btn-sm{padding:clamp(7px,2vw,8px) clamp(10px,2.5vw,13px);font-size:clamp(.75rem,2.5vw,.8rem)}
+
+/* LINKS */
+.links-toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:clamp(12px,3vw,16px);flex-wrap:wrap;gap:8px}
+#linkCount{font-weight:700;font-size:clamp(.8rem,2.5vw,.88rem)}
+.links-list{display:flex;flex-direction:column;gap:clamp(8px,2vw,12px)}
+.link-card{background:var(--white);border:2.5px solid var(--black);border-radius:12px;padding:clamp(10px,2.5vw,14px) clamp(12px,3vw,16px);display:flex;align-items:center;gap:clamp(8px,2vw,12px);box-shadow:var(--s3);transition:box-shadow .15s;animation:popUp .3s ease both}
+.link-card:hover{box-shadow:5px 5px 0 var(--black)}
+.link-drag{cursor:grab;color:#bbb;flex-shrink:0;display:flex;align-items:center;padding:2px}
+.link-color-dot{width:12px;height:12px;border-radius:50%;border:2px solid var(--black);flex-shrink:0}
+.link-info{flex:1;min-width:0}
+.link-title{font-weight:700;font-size:clamp(.82rem,3vw,.9rem);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.link-url{font-size:clamp(.7rem,2.5vw,.78rem);color:#555;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.link-actions{display:flex;gap:clamp(4px,1.5vw,6px);flex-shrink:0}
+@media(max-width:360px){.link-card{flex-wrap:wrap}.link-actions{width:100%;justify-content:flex-end}}
+
+/* PREVIEW */
+.preview-outer{display:flex;justify-content:center;padding:clamp(10px,3vw,20px) 0}
+.preview-phone{background:var(--cyan);border:3px solid var(--black);border-radius:clamp(16px,4vw,24px);padding:clamp(20px,5vw,32px) clamp(16px,4vw,22px);width:100%;max-width:320px;box-shadow:var(--s6);display:flex;flex-direction:column;align-items:center}
+.prev-avatar{width:clamp(60px,16vw,80px);height:clamp(60px,16vw,80px);border-radius:50%;border:3px solid var(--black);overflow:hidden;margin-bottom:10px;background:#ccc;box-shadow:var(--s3)}
+.prev-avatar img{width:100%;height:100%;object-fit:cover;display:block}
+.prev-name{font-weight:900;font-size:clamp(.9rem,3vw,1.05rem);text-align:center}
+.prev-bio{font-size:clamp(.75rem,2.5vw,.85rem);color:#1a5a66;text-align:center;margin:4px 0 16px;line-height:1.4}
+.prev-links{display:flex;flex-direction:column;gap:clamp(8px,2vw,12px);width:100%}
+.prev-link{padding:clamp(10px,2.5vw,13px) 14px;text-align:center;border:2.5px solid var(--black);border-radius:clamp(8px,2.5vw,12px);font-weight:700;font-size:clamp(.78rem,3vw,.88rem);box-shadow:var(--s3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:999;display:flex;align-items:flex-end;justify-content:center;padding:0;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--yellow);border:3px solid var(--black);border-radius:20px 20px 0 0;padding:clamp(20px,5vw,28px) clamp(18px,5vw,26px) max(clamp(20px,5vw,28px),env(safe-area-inset-bottom));width:100%;max-width:520px;box-shadow:0 -6px 0 var(--black);transform:translateY(100%);transition:transform .3s cubic-bezier(.34,1.2,.64,1);max-height:92vh;overflow-y:auto}
+.modal-overlay.open .modal{transform:translateY(0)}
+@media(min-width:600px){
+  .modal-overlay{align-items:center;padding:20px}
+  .modal{border-radius:16px;box-shadow:8px 8px 0 var(--black);transform:scale(.9) translateY(20px);max-height:85vh}
+  .modal-overlay.open .modal{transform:scale(1) translateY(0)}
+}
+.modal-handle{width:36px;height:4px;border-radius:2px;background:rgba(0,0,0,.25);margin:0 auto 16px}
+@media(min-width:600px){.modal-handle{display:none}}
+.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:clamp(14px,3vw,20px);padding-bottom:10px;border-bottom:2.5px solid var(--black)}
+.modal-title{font-family:'Bebas Neue',cursive;font-size:clamp(1.2rem,4vw,1.5rem);letter-spacing:1px}
+.modal-close{background:none;border:none;cursor:pointer;width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;transition:background .15s;-webkit-tap-highlight-color:transparent}
+.modal-close:hover{background:rgba(0,0,0,.1)}
+.modal-close svg{width:18px;height:18px}
+.modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:clamp(14px,3vw,20px);flex-wrap:wrap}
+.color-row{display:flex;gap:clamp(6px,2vw,10px);flex-wrap:wrap;margin-top:6px}
+.swatch{width:clamp(28px,8vw,32px);height:clamp(28px,8vw,32px);border-radius:50%;border:2.5px solid var(--black);cursor:pointer;transition:transform .15s,box-shadow .15s;box-shadow:var(--s3);-webkit-tap-highlight-color:transparent}
+.swatch:hover,.swatch.sel{transform:scale(1.25);box-shadow:3px 3px 0 var(--black)}
+.swatch.sel{outline:3px solid var(--black);outline-offset:2px}
+
+/* SAVING INDICATOR */
+.saving{display:none;font-size:.78rem;font-weight:700;color:#1a5a66;margin-left:10px;animation:blink 1s infinite}
+.saving.show{display:inline}
+
+/* TOAST */
+.toast{position:fixed;bottom:clamp(16px,4vw,24px);left:50%;transform:translateX(-50%) translateY(80px);background:var(--black);color:var(--yellow);padding:clamp(10px,2.5vw,12px) clamp(16px,4vw,22px);border-radius:10px;font-weight:700;font-size:clamp(.82rem,3vw,.88rem);box-shadow:4px 4px 0 rgba(0,0,0,.25);z-index:9999;opacity:0;transition:transform .3s cubic-bezier(.34,1.56,.64,1),opacity .3s;pointer-events:none;white-space:nowrap;max-width:calc(100vw - 32px);text-align:center}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+
+@keyframes slideDown{from{opacity:0;transform:translateY(-14px)}to{opacity:1;transform:none}}
+@keyframes popUp{from{opacity:0;transform:translateY(10px) scale(.96)}to{opacity:1;transform:none}}
+@keyframes popIn{from{opacity:0;transform:scale(.88) translateY(20px)}to{opacity:1;transform:none}}
+
+@media(max-width:768px){
+  .topbar{display:flex}
+  .sidebar{position:fixed;top:0;left:0;bottom:0;transform:translateX(-100%);box-shadow:6px 0 0 var(--black);z-index:160}
+  .sidebar.open{transform:translateX(0)}
+  .layout{display:block}
+  .main{padding-top:16px}
+}
+@media(min-width:769px){
+  .topbar{display:none}
+  .layout{display:flex}
+}
+</style>
+</head>
+<body>
+
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="login-logo"><span>BIO</span>.LINK</div>
+    <div class="login-sub">Masuk ke dashboard admin</div>
+    <div class="login-err" id="loginErr">Password salah! Coba lagi.</div>
+    <div class="field">
+      <label>Password</label>
+      <div class="pass-wrap">
+        <input type="password" id="loginPass" placeholder="Masukkan password..." onkeydown="if(event.key==='Enter')doLogin()"/>
+        <button class="pass-toggle" onclick="togglePass('loginPass')" tabindex="-1">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+      </div>
+    </div>
+    <button class="btn btn-black" style="width:100%;justify-content:center;margin-top:4px" onclick="doLogin()">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="16" height="16"><path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+      Masuk
+    </button>
+    <div class="login-hint">Default password: <strong>admin123</strong></div>
+  </div>
+</div>
+
+<div id="dashboard" style="display:none">
+  <div class="topbar">
+    <div class="topbar-logo"><span>BIO</span>.LINK</div>
+    <button class="hamburger" id="hamburgerBtn">
+      <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+  </div>
+  <div class="drawer-overlay" id="drawerOverlay" onclick="closeSidebar()"></div>
+  <div class="layout">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-logo"><span>BIO</span>.LINK</div>
+      <nav class="nav">
+        <button class="nav-item active" onclick="showTab('profile');closeSidebar()">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>Profil
+        </button>
+        <button class="nav-item" onclick="showTab('links');closeSidebar()">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>Kelola Link
+        </button>
+        <button class="nav-item" onclick="showTab('preview');closeSidebar()">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>Preview
+        </button>
+        <button class="nav-item" onclick="showTab('settings');closeSidebar()">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>Pengaturan
+        </button>
+      </nav>
+      <button class="logout-btn" onclick="doLogout()">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Keluar
+      </button>
+      <div class="sidebar-footer">Bio Link Admin v2.0</div>
+    </aside>
+
+    <main class="main">
+
+      <!-- TAB PROFIL -->
+      <div id="tab-profile">
+        <div class="page-header">
+          <h1>Edit Profil <span class="live-badge"><span class="live-dot"></span>LIVE</span></h1>
+          <p>Perubahan langsung tampil ke semua pengunjung</p>
+        </div>
+        <div class="section">
+          <div class="section-title">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>Foto Profil
+          </div>
+          <div class="photo-area">
+            <div class="avatar-preview" onclick="document.getElementById('fileInput').click()" tabindex="0" role="button">
+              <img id="adminAvatar" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Crect width='96' height='96' fill='%23ddd'/%3E%3Ccircle cx='48' cy='36' r='18' fill='%23aaa'/%3E%3Cellipse cx='48' cy='80' rx='28' ry='20' fill='%23aaa'/%3E%3C/svg%3E" alt="Avatar"/>
+              <div class="av-overlay"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg></div>
+            </div>
+            <input type="file" id="fileInput" accept="image/*" onchange="handlePhoto(this)"/>
+            <div class="photo-info">
+              <p>Klik foto untuk mengganti. Format JPG, PNG, GIF. Maks 5MB. Foto akan dikompres otomatis.</p>
+              <div class="photo-btns">
+                <button class="btn btn-black btn-sm" onclick="document.getElementById('fileInput').click()">
+                  <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Upload
+                </button>
+                <button class="btn btn-red btn-sm" onclick="removeAvatar()">
+                  <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>Hapus
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="section">
+          <div class="section-title">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Info Profil
+          </div>
+          <div class="field"><label>Nama Tampilan</label><input type="text" id="inputName" placeholder="Nama kamu..." oninput="syncPreview()"/></div>
+          <div class="field"><label>Bio</label><textarea id="inputBio" placeholder="Tulis bio singkat..." oninput="syncPreview()"></textarea></div>
+          <button class="btn btn-black" onclick="saveProfile()">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            Simpan & Publish
+          </button>
+        </div>
+      </div>
+
+      <!-- TAB LINKS -->
+      <div id="tab-links" style="display:none">
+        <div class="page-header">
+          <h1>Kelola Link <span class="live-badge"><span class="live-dot"></span>LIVE</span></h1>
+          <p>Perubahan langsung tampil ke semua pengunjung</p>
+        </div>
+        <div class="section">
+          <div class="section-title">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>Daftar Link
+          </div>
+          <div class="links-toolbar">
+            <span id="linkCount">0 link aktif</span>
+            <button class="btn btn-green" onclick="openAddModal()">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Tambah Link
+            </button>
+          </div>
+          <div class="links-list" id="linksList"></div>
+        </div>
+      </div>
+
+      <!-- TAB PREVIEW -->
+      <div id="tab-preview" style="display:none">
+        <div class="page-header"><h1>Preview</h1><p>Tampilan bio link kamu saat ini</p></div>
+        <div class="preview-outer">
+          <div class="preview-phone">
+            <div class="prev-avatar"><img id="prevAvatar" src="" alt=""/></div>
+            <div class="prev-name" id="prevName">Your Name</div>
+            <div class="prev-bio" id="prevBio"></div>
+            <div class="prev-links" id="prevLinks"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB SETTINGS -->
+      <div id="tab-settings" style="display:none">
+        <div class="page-header"><h1>Pengaturan</h1><p>Kelola keamanan akun admin</p></div>
+        <div class="section">
+          <div class="section-title">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>Ganti Password
+          </div>
+          <div class="field"><label>Password Lama</label><div class="pass-wrap"><input type="password" id="oldPass" placeholder="Password saat ini..."/><button class="pass-toggle" onclick="togglePass('oldPass')" tabindex="-1"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button></div></div>
+          <div class="field"><label>Password Baru</label><div class="pass-wrap"><input type="password" id="newPass" placeholder="Min. 6 karakter..."/><button class="pass-toggle" onclick="togglePass('newPass')" tabindex="-1"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button></div></div>
+          <div class="field"><label>Konfirmasi Password Baru</label><div class="pass-wrap"><input type="password" id="confirmPass" placeholder="Ulangi password baru..."/><button class="pass-toggle" onclick="togglePass('confirmPass')" tabindex="-1"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button></div></div>
+          <button class="btn btn-black" onclick="changePassword()">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>Simpan Password
+          </button>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- MODAL LINK -->
+<div class="modal-overlay" id="linkModal" onclick="if(event.target===this)closeModal('linkModal')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <div class="modal-title" id="modalTitle">Tambah Link</div>
+      <button class="modal-close" onclick="closeModal('linkModal')"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="field"><label>Judul Link</label><input type="text" id="mTitle" placeholder="cth: Website Saya"/></div>
+    <div class="field"><label>URL</label><input type="url" id="mUrl" placeholder="https://example.com" inputmode="url"/></div>
+    <div class="field"><label>Warna Tombol</label><div class="color-row" id="colorRow"></div></div>
+    <div class="modal-footer">
+      <button class="btn btn-black btn-sm" onclick="closeModal('linkModal')">Batal</button>
+      <button class="btn btn-green" onclick="saveLink()" id="saveLinkBtn"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL HAPUS -->
+<div class="modal-overlay" id="deleteModal" onclick="if(event.target===this)closeModal('deleteModal')">
+  <div class="modal" style="max-width:380px">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <div class="modal-title">Hapus Link?</div>
+      <button class="modal-close" onclick="closeModal('deleteModal')"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <p style="font-size:clamp(.85rem,3vw,.9rem);color:#444;font-weight:500;line-height:1.5">Link "<strong id="delName"></strong>" akan dihapus permanen. Lanjutkan?</p>
+    <div class="modal-footer">
+      <button class="btn btn-black btn-sm" onclick="closeModal('deleteModal')">Batal</button>
+      <button class="btn btn-red" onclick="confirmDelete()"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>Hapus</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+/* ══ FIREBASE ══ */
+const firebaseConfig = {
+  apiKey: "AIzaSyDt4yo-bMA-n9klqeDHEUS-S8AJroXlKXo",
+  authDomain: "gyozx-25780.firebaseapp.com",
+  projectId: "gyozx-25780",
+  storageBucket: "gyozx-25780.firebasestorage.app",
+  messagingSenderId: "50259732126",
+  appId: "1:50259732126:web:9888c31afbea9622dffd8f"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const profileRef = db.collection('biolink').doc('profile');
+
+/* ══ CONSTANTS ══ */
+const PASSWORD_KEY = 'biolink_password';
+const SESSION_KEY  = 'biolink_session';
+const DEFAULT_PASS = 'admin123';
+const PLACEHOLDER  = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Crect width='96' height='96' fill='%23ddd'/%3E%3Ccircle cx='48' cy='36' r='18' fill='%23aaa'/%3E%3Cellipse cx='48' cy='80' rx='28' ry='20' fill='%23aaa'/%3E%3C/svg%3E";
+const COLORS = ['#FF5C78','#4DD9C4','#CC66FF','#FF9A3C','#39FF6E','#FFE000','#1D9BF0','#FF3A3A'];
+const TABS   = ['profile','links','preview','settings'];
+
+/* ══ STATE ══ */
+let appData  = { name:'', bio:'', avatar:'', links:[] };
+let nextId   = 1;
+let editId   = null;
+let delId    = null;
+let selColor = COLORS[0];
+
+/* ══ LOGIN ══ */
+function getPassword(){ return localStorage.getItem(PASSWORD_KEY) || DEFAULT_PASS; }
+
+function doLogin(){
+  const val = document.getElementById('loginPass').value;
+  if(val === getPassword()){
+    sessionStorage.setItem(SESSION_KEY,'1');
+    document.getElementById('loginErr').classList.remove('show');
+    showDashboard();
+  } else {
+    document.getElementById('loginErr').classList.add('show');
+    document.getElementById('loginPass').value='';
+    document.getElementById('loginPass').focus();
+  }
+}
+function doLogout(){
+  sessionStorage.removeItem(SESSION_KEY);
+  location.reload();
+}
+function togglePass(id){
+  const inp=document.getElementById(id);
+  inp.type=inp.type==='password'?'text':'password';
+}
+
+/* ══ DASHBOARD ══ */
+function showDashboard(){
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('dashboard').style.display='block';
+  document.getElementById('hamburgerBtn').addEventListener('click', openSidebar);
+  // Load data dari Firestore
+  profileRef.get().then(doc => {
+    if(doc.exists){
+      appData = doc.data();
+      nextId = appData.links?.length ? Math.max(...appData.links.map(l=>l.id))+1 : 1;
+    } else {
+      // Set default data jika belum ada
+      appData = {name:'Your Name', bio:'playing around figma 🤖👊', avatar:'', links:[
+        {id:1,title:'Website 1',url:'https://example.com',color:'#FF5C78'},
+        {id:2,title:'Website 2',url:'https://example.com',color:'#4DD9C4'},
+        {id:3,title:'Website 3',url:'https://example.com',color:'#CC66FF'},
+      ]};
+      nextId = 4;
+      profileRef.set(appData);
+    }
+    populateFields();
+    renderAdminLinks();
+    syncPreview();
+  }).catch(e => toast('❌ Gagal memuat data: '+e.message));
+}
+
+/* ══ SAVE TO FIRESTORE ══ */
+function saveToFirestore(){
+  return profileRef.set(appData)
+    .then(()=> toast('✅ Tersimpan & dipublish ke semua pengunjung!'))
+    .catch(e => toast('❌ Gagal simpan: '+e.message));
+}
+
+/* ══ SIDEBAR ══ */
+function openSidebar(){
+  document.getElementById('sidebar').classList.add('open');
+  const ov=document.getElementById('drawerOverlay');
+  ov.style.display='block'; ov.style.pointerEvents='all';
+  requestAnimationFrame(()=>ov.style.opacity='1');
+  document.body.style.overflow='hidden';
+}
+function closeSidebar(){
+  document.getElementById('sidebar').classList.remove('open');
+  const ov=document.getElementById('drawerOverlay');
+  ov.style.opacity='0'; ov.style.pointerEvents='none';
+  setTimeout(()=>ov.style.display='none',260);
+  document.body.style.overflow='';
+}
+
+/* ══ TABS ══ */
+function showTab(t){
+  TABS.forEach(id=>document.getElementById('tab-'+id).style.display=id===t?'':'none');
+  document.querySelectorAll('.nav-item').forEach((el,i)=>el.classList.toggle('active',TABS[i]===t));
+  if(t==='preview') syncPreview();
+}
+
+/* ══ POPULATE FIELDS ══ */
+function populateFields(){
+  document.getElementById('adminAvatar').src = appData.avatar||PLACEHOLDER;
+  document.getElementById('inputName').value  = appData.name||'';
+  document.getElementById('inputBio').value   = appData.bio||'';
+}
+
+/* ══ COMPRESS & UPLOAD PHOTO ══ */
+function handlePhoto(inp){
+  const f=inp.files[0]; if(!f) return;
+  if(f.size>5*1024*1024){ toast('❌ File terlalu besar! Maks 5MB'); return; }
+  const img=new Image();
+  const reader=new FileReader();
+  reader.onload=e=>{
+    img.onload=()=>{
+      // Kompres ke max 400x400
+      const MAX=400;
+      let w=img.width, h=img.height;
+      if(w>h){ if(w>MAX){h=h*(MAX/w);w=MAX;} } else { if(h>MAX){w=w*(MAX/h);h=MAX;} }
+      const canvas=document.createElement('canvas');
+      canvas.width=w; canvas.height=h;
+      canvas.getContext('2d').drawImage(img,0,0,w,h);
+      const compressed=canvas.toDataURL('image/jpeg',0.7);
+      appData.avatar=compressed;
+      document.getElementById('adminAvatar').src=compressed;
+      syncPreview();
+      saveToFirestore();
+    };
+    img.src=e.target.result;
+  };
+  reader.readAsDataURL(f);
+}
+function removeAvatar(){
+  appData.avatar='';
+  document.getElementById('adminAvatar').src=PLACEHOLDER;
+  syncPreview();
+  saveToFirestore();
+}
+
+/* ══ SAVE PROFILE ══ */
+function saveProfile(){
+  appData.name = document.getElementById('inputName').value.trim()||'Your Name';
+  appData.bio  = document.getElementById('inputBio').value.trim();
+  syncPreview();
+  saveToFirestore();
+}
+
+/* ══ PREVIEW SYNC ══ */
+function syncPreview(){
+  const name   = document.getElementById('inputName')?.value || appData.name;
+  const bio    = document.getElementById('inputBio')?.value  || appData.bio;
+  const avatar = appData.avatar||PLACEHOLDER;
+  const pn=document.getElementById('prevName'); if(pn) pn.textContent=name;
+  const pb=document.getElementById('prevBio');  if(pb) pb.textContent=bio;
+  const pa=document.getElementById('prevAvatar'); if(pa) pa.src=avatar;
+  const pl=document.getElementById('prevLinks');
+  if(pl) pl.innerHTML=appData.links.map(l=>`<div class="prev-link" style="background:${l.color}">${esc(l.title)}</div>`).join('');
+}
+
+/* ══ RENDER LINKS ══ */
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function renderAdminLinks(){
+  const cnt=document.getElementById('linkCount');
+  if(cnt) cnt.textContent=appData.links.length+' link aktif';
+  const list=document.getElementById('linksList');
+  if(!list) return;
+  list.innerHTML=appData.links.map(l=>`
+    <div class="link-card">
+      <div class="link-drag"><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/></svg></div>
+      <div class="link-color-dot" style="background:${l.color}"></div>
+      <div class="link-info"><div class="link-title">${esc(l.title)}</div><div class="link-url">${esc(l.url)}</div></div>
+      <div class="link-actions">
+        <button class="btn btn-mint btn-sm" onclick="openEditModal(${l.id})">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="13" height="13"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Edit
+        </button>
+        <button class="btn btn-red btn-sm" onclick="openDelModal(${l.id})">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="13" height="13"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>Hapus
+        </button>
+      </div>
+    </div>
+  `).join('');
+}
+
+/* ══ COLOR PICKER ══ */
+function buildColors(){
+  document.getElementById('colorRow').innerHTML=COLORS.map(c=>
+    `<div class="swatch ${c===selColor?'sel':''}" style="background:${c}" onclick="pickColor('${c}')"></div>`
+  ).join('');
+}
+function pickColor(c){ selColor=c; buildColors(); }
+
+/* ══ MODAL ADD/EDIT ══ */
+function openAddModal(){
+  editId=null; selColor=COLORS[0];
+  document.getElementById('modalTitle').textContent='Tambah Link';
+  document.getElementById('saveLinkBtn').innerHTML=`<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="15" height="15"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Tambah`;
+  document.getElementById('mTitle').value='';
+  document.getElementById('mUrl').value='';
+  buildColors();
+  document.getElementById('linkModal').classList.add('open');
+}
+function openEditModal(id){
+  const l=appData.links.find(x=>x.id===id); if(!l) return;
+  editId=id; selColor=l.color;
+  document.getElementById('modalTitle').textContent='Edit Link';
+  document.getElementById('saveLinkBtn').innerHTML=`<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" width="15" height="15"><polyline points="20 6 9 17 4 12"/></svg> Simpan`;
+  document.getElementById('mTitle').value=l.title;
+  document.getElementById('mUrl').value=l.url;
+  buildColors();
+  document.getElementById('linkModal').classList.add('open');
+}
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+
+function saveLink(){
+  const title=document.getElementById('mTitle').value.trim();
+  const url=document.getElementById('mUrl').value.trim();
+  if(!title){ toast('⚠️ Judul tidak boleh kosong!'); return; }
+  if(!url){ toast('⚠️ URL tidak boleh kosong!'); return; }
+  if(!url.startsWith('http')){ toast('⚠️ URL harus diawali https://'); return; }
+  if(editId){
+    const i=appData.links.findIndex(l=>l.id===editId);
+    appData.links[i]={...appData.links[i],title,url,color:selColor};
+  } else {
+    appData.links.push({id:nextId++,title,url,color:selColor});
+  }
+  closeModal('linkModal');
+  renderAdminLinks();
+  syncPreview();
+  saveToFirestore();
+}
+
+/* ══ DELETE ══ */
+function openDelModal(id){
+  delId=id;
+  const l=appData.links.find(x=>x.id===id);
+  document.getElementById('delName').textContent=l?l.title:'';
+  document.getElementById('deleteModal').classList.add('open');
+}
+function confirmDelete(){
+  appData.links=appData.links.filter(l=>l.id!==delId);
+  closeModal('deleteModal');
+  renderAdminLinks();
+  syncPreview();
+  saveToFirestore();
+}
+
+/* ══ CHANGE PASSWORD ══ */
+function changePassword(){
+  const oldP=document.getElementById('oldPass').value;
+  const newP=document.getElementById('newPass').value;
+  const confP=document.getElementById('confirmPass').value;
+  if(oldP!==getPassword()){ toast('❌ Password lama salah!'); return; }
+  if(newP.length<6){ toast('⚠️ Password baru min. 6 karakter!'); return; }
+  if(newP!==confP){ toast('⚠️ Konfirmasi tidak cocok!'); return; }
+  localStorage.setItem(PASSWORD_KEY,newP);
+  ['oldPass','newPass','confirmPass'].forEach(id=>document.getElementById(id).value='');
+  toast('✅ Password berhasil diubah!');
+}
+
+/* ══ TOAST ══ */
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(t._t);
+  t._t=setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+/* ══ BOOT ══ */
+if(sessionStorage.getItem(SESSION_KEY)==='1'){
+  document.getElementById('loginScreen').style.display='none';
+  showDashboard();
+}
+</script>
+</body>
+</html>
